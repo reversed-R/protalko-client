@@ -12,6 +12,11 @@ function App() {
     setGreetMsg(await invoke("greet", { name }));
   }
 
+  async function post_user() {
+    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+    setGreetMsg(await invoke("greet", { name }));
+  }
+
   return (
     <main className="container">
       <h1>Welcome to Tauri + React</h1>
