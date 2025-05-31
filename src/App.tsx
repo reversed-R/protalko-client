@@ -1,11 +1,16 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
-import { commands } from "./bindings.ts";
+import { commands, UserPresentation } from "./bindings.ts";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [user, setUser] = useState<UserPresentation>({
+    id: "uuid",
+    name: "name",
+    visible_id: "visible_id",
+  });
+  const [statusMsg, setStatusMsg] = useState("nothing");
 
   return (
     <main className="container">
@@ -28,18 +33,27 @@ function App() {
         className="row"
         onSubmit={async (e) => {
           e.preventDefault();
-          const res = await commands.getUserById(name);
-          setGreetMsg(res);
+          const res = await commands.getUserById(userId);
+          if (res.status === "ok") {
+            setUser(res.data);
+          }
+          if (res.status === "error") {
+            setStatusMsg(res.error.message);
+          }
         }}
       >
         <input
           id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+          onChange={(e) => setUserId(e.currentTarget.value)}
+          placeholder="Enter a user id..."
         />
         <button type="submit">Greet</button>
       </form>
-      <p>{greetMsg}</p>
+      <p>
+        ユーザー: 内部ID: {user.id}, 表示名: {user.name}, ユーザー設定ID:{" "}
+        {user.visible_id}
+      </p>
+      <p>ステータス: {statusMsg}</p>
     </main>
   );
 }

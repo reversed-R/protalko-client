@@ -1,31 +1,13 @@
+pub mod commands;
 pub mod models;
-
-use tauri_plugin_http::reqwest;
-
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-#[specta::specta]
-fn post_user(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-#[tauri::command]
-#[specta::specta]
-async fn get_user_by_id(id: String) -> String {
-    let res = reqwest::get(format!("http://localhost:8080/users/{}", id)).await;
-
-    match res {
-        Ok(v) => {
-            format!("{:?}", v.text().await)
-        }
-        Err(_) => "".to_string(),
-    }
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri_specta::Builder::<tauri::Wry>::new()
-        .commands(tauri_specta::collect_commands![post_user, get_user_by_id]);
+    let builder =
+        tauri_specta::Builder::<tauri::Wry>::new().commands(tauri_specta::collect_commands![
+            commands::user::post_user,
+            commands::user::get_user_by_id
+        ]);
 
     #[cfg(debug_assertions)]
     builder

@@ -8,8 +8,13 @@ export const commands = {
 async postUser(name: string) : Promise<string> {
     return await TAURI_INVOKE("post_user", { name });
 },
-async getUserById(id: string) : Promise<string> {
-    return await TAURI_INVOKE("get_user_by_id", { id });
+async getUserById(id: string) : Promise<Result<UserPresentation, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_user_by_id", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -23,7 +28,8 @@ async getUserById(id: string) : Promise<string> {
 
 /** user-defined types **/
 
-
+export type CommandError = { message: string }
+export type UserPresentation = { id: string; name: string; visible_id: string }
 
 /** tauri-specta globals **/
 
