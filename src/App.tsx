@@ -1,16 +1,16 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
+import { commands, UserPresentation } from "./bindings.ts";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const [userId, setUserId] = useState("");
+  const [user, setUser] = useState<UserPresentation>({
+    id: "uuid",
+    name: "name",
+    visible_id: "visible_id",
+  });
+  const [statusMsg, setStatusMsg] = useState("nothing");
 
   return (
     <main className="container">
@@ -31,19 +31,29 @@ function App() {
 
       <form
         className="row"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          greet();
+          const res = await commands.getUserById(userId);
+          if (res.status === "ok") {
+            setUser(res.data);
+          }
+          if (res.status === "error") {
+            setStatusMsg(res.error.message);
+          }
         }}
       >
         <input
           id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+          onChange={(e) => setUserId(e.currentTarget.value)}
+          placeholder="Enter a user id..."
         />
         <button type="submit">Greet</button>
       </form>
-      <p>{greetMsg}</p>
+      <p>
+        ユーザー: 内部ID: {user.id}, 表示名: {user.name}, ユーザー設定ID:{" "}
+        {user.visible_id}
+      </p>
+      <p>ステータス: {statusMsg}</p>
     </main>
   );
 }
